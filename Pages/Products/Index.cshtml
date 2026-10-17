@@ -1,0 +1,85 @@
+@page
+@model HotelBooking.Pages.Products.IndexModel
+@{
+    ViewData["Title"] = "Khám phá và đặt khách sạn";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .trip-page{--blue:#0879d1;--navy:#19334d;--orange:#f26a21;color:#25364a}.trip-page *{box-sizing:border-box}.trip-page a{text-decoration:none;color:inherit}.trip-page button{cursor:pointer}.trip-hero{background:linear-gradient(120deg,#12365b,#0788db);color:#fff;padding:42px 20px}.trip-wrap{max-width:1160px;margin:auto;padding:0 20px}.search-box,.hotel-card,.detail-card,.booking-card{background:#fff;border-radius:16px;box-shadow:0 8px 30px #1b385714}.search-box{color:#25364a;padding:22px;margin-top:24px}.search-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:12px;align-items:end}.field label{display:block;font-size:12px;font-weight:700;color:#607184;margin-bottom:6px}.field input,.field select{width:100%;height:44px;border:1px solid #d7e0e8;border-radius:8px;padding:0 10px;background:#fff;color:#25364a}.primary{border:0;border-radius:8px;background:var(--orange);color:white;padding:13px 22px;font-weight:700}.section{margin:38px auto}.section h2{color:var(--navy);margin:0 0 6px}.muted{color:#718096}.dest-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:18px}.dest{position:relative;height:160px;border-radius:12px;overflow:hidden;color:white!important}.dest img{width:100%;height:100%;object-fit:cover;transition:transform .2s}.dest:hover img{transform:scale(1.06)}.dest span{position:absolute;inset:auto 0 0;padding:32px 12px 12px;background:linear-gradient(transparent,#000b);font-weight:700}.hotel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:18px}.hotel-card{overflow:hidden;border:1px solid #edf0f3}.hotel-card img{width:100%;height:185px;object-fit:cover}.hotel-body{padding:15px}.badge{color:#b44708;background:#fff0df;padding:4px 8px;border-radius:20px;font-size:12px}.rating{color:#0879d1;font-weight:700}.card-actions{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #edf0f3;padding-top:12px;margin-top:12px}.price{font-weight:800;color:#e65d19}.detail-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.8fr);gap:24px;margin:28px auto}.detail-card,.booking-card{padding:22px}.detail-image{width:100%;height:390px;object-fit:cover;border-radius:12px}.booking-card{align-self:start;position:sticky;top:20px}.amenities{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0}.amenities span{background:#edf6fc;padding:8px 10px;border-radius:8px;font-size:14px}.booking-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.notice{padding:13px;border-radius:9px;background:#e8f8ef;color:#17683b;margin:14px 0}.validation{color:#b42318;font-size:14px}.result-heading{display:flex;justify-content:space-between;align-items:end;gap:12px}
+        @@media(max-width:900px){.search-grid{grid-template-columns:repeat(2,1fr)}.hotel-grid{grid-template-columns:repeat(2,1fr)}.dest-grid{grid-template-columns:repeat(3,1fr)}.detail-layout{grid-template-columns:1fr}.booking-card{position:static}}
+        @@media(max-width:560px){.search-grid,.booking-grid{grid-template-columns:1fr}.hotel-grid{grid-template-columns:1fr}.dest-grid{grid-template-columns:repeat(2,1fr)}.detail-image{height:240px}.result-heading{align-items:start;flex-direction:column}}
+    </style>
+}
+
+<div class="trip-page">
+@if (Model.SelectedHotel is not null)
+{
+    var hotel = Model.SelectedHotel;
+    <div class="trip-wrap">
+        <p class="muted" style="margin-top:22px"><a asp-page="/Products/Index">Trang chủ</a> / @hotel.Location / @hotel.Name</p>
+        @if (Model.BookingComplete) { <div class="notice"><strong>Đặt phòng thành công</strong><br>@Model.BookingMessage</div> }
+        <div class="detail-layout">
+            <article class="detail-card">
+                <img class="detail-image" src="@hotel.ImageUrl" alt="@hotel.Name">
+                <p style="margin-top:18px"><span class="badge">@hotel.Badge</span> <span class="rating">★ @hotel.Rating</span> <span class="muted">(@hotel.Reviews đánh giá)</span></p>
+                <h1>@hotel.Name</h1><p class="muted"><i class="fa-solid fa-location-dot"></i> @hotel.Location</p>
+                <p>@hotel.Description</p><h3>Tiện nghi nổi bật</h3>
+                <div class="amenities">@foreach (var item in hotel.Amenities.Split(", ")) { <span><i class="fa-solid fa-check"></i> @item</span> }</div>
+                <h3>Thông tin lưu trú</h3><p class="muted">Nhận phòng từ 14:00 · Trả phòng trước 12:00 · Hỗ trợ khách hàng 24/7.</p>
+            </article>
+            <aside class="booking-card">
+                <div class="price">@hotel.Price.ToString("N0") ₫ <span class="muted" style="font-weight:400">/ phòng / đêm</span></div>
+                <p class="muted">Chọn lịch và thông tin khách để gửi yêu cầu đặt phòng</p>
+                <form method="post" asp-page-handler="Book">
+                    <input type="hidden" name="Hotel" value="@hotel.Id">
+                    <div class="booking-grid">
+                        <div class="field"><label asp-for="CheckIn">Nhận phòng</label><input asp-for="CheckIn" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" required></div>
+                        <div class="field"><label asp-for="CheckOut">Trả phòng</label><input asp-for="CheckOut" type="date" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" required></div>
+                        <div class="field"><label asp-for="Adults">Người lớn</label><input asp-for="Adults" type="number" min="1" max="10" required></div>
+                        <div class="field"><label asp-for="Rooms">Phòng</label><input asp-for="Rooms" type="number" min="1" max="5" required></div>
+                    </div>
+                    <div class="field" style="margin-top:12px"><label asp-for="GuestName">Họ tên người đặt</label><input asp-for="GuestName" placeholder="Nguyễn Văn A" required></div>
+                    <div class="field" style="margin-top:12px"><label asp-for="GuestEmail">Email liên hệ</label><input asp-for="GuestEmail" type="email" placeholder="ban@email.com" required></div>
+                    <div asp-validation-summary="All" class="validation"></div>
+                    <p class="muted" style="margin-top:14px">Tạm tính: <strong class="price">@Model.TotalPrice.ToString("N0") ₫</strong></p>
+                    <button class="primary" type="submit" style="width:100%">Gửi yêu cầu đặt phòng</button>
+                    <small class="muted" style="display:block;margin-top:10px">Bản demo chưa xử lý thanh toán hoặc xác nhận phòng thực tế.</small>
+                </form>
+            </aside>
+        </div>
+    </div>
+}
+else
+{
+    <section class="trip-hero"><div class="trip-wrap">
+        <h1 style="text-align:center;margin:0">Khám phá điểm đến yêu thích</h1><p style="text-align:center;color:#d9edff">Tìm khách sạn phù hợp cho chuyến đi tiếp theo của bạn</p>
+        <form method="get" class="search-box search-grid">
+            <div class="field"><label asp-for="Destination">Thành phố, khách sạn hoặc điểm đến</label><input asp-for="Destination" placeholder="Ví dụ: Đà Lạt, Đà Nẵng..."></div>
+            <div class="field"><label asp-for="CheckIn">Nhận phòng</label><input asp-for="CheckIn" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"></div>
+            <div class="field"><label asp-for="CheckOut">Trả phòng</label><input asp-for="CheckOut" type="date" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")"></div>
+            <div class="field"><label asp-for="Adults">Người lớn / phòng</label><div style="display:flex;gap:8px"><input asp-for="Adults" type="number" min="1" max="10" aria-label="Người lớn"><input asp-for="Rooms" type="number" min="1" max="5" aria-label="Số phòng"></div></div>
+            <button class="primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
+        </form>
+    </div></section>
+    <main class="trip-wrap">
+        @if (Model.IsSearch)
+        {
+            @if (Model.SelectedDestination is not null)
+            {
+                <section class="section detail-card"><img src="@Model.SelectedDestination.Img" alt="@Model.SelectedDestination.Name" style="width:100%;height:260px;object-fit:cover;border-radius:12px"><p class="muted" style="margin-top:16px">Điểm đến nổi bật · @Model.SelectedDestination.Hotels</p><h1>Khám phá @Model.SelectedDestination.Name</h1><p>Khám phá khách sạn, trải nghiệm và những địa điểm được yêu thích tại @Model.SelectedDestination.Name. Chọn ngày lưu trú để tìm lựa chọn phù hợp.</p><form method="get" class="search-grid"><input type="hidden" name="Destination" value="@Model.SelectedDestination.Name"><div class="field"><label asp-for="CheckIn">Nhận phòng</label><input asp-for="CheckIn" type="date"></div><div class="field"><label asp-for="CheckOut">Trả phòng</label><input asp-for="CheckOut" type="date"></div><div class="field"><label asp-for="Adults">Người lớn</label><input asp-for="Adults" type="number" min="1" max="10"></div><div class="field"><label asp-for="Rooms">Phòng</label><input asp-for="Rooms" type="number" min="1" max="5"></div><button class="primary" type="submit">Tìm khách sạn</button></form></section>
+            }
+            <section class="section"><div class="result-heading"><div><h2>Kết quả khách sạn</h2><p class="muted">@Model.HotelList.Count khách sạn phù hợp với “@Model.Destination”</p></div><a class="muted" asp-page="/Products/Index">Xóa tìm kiếm</a></div>
+                @if (Model.HotelList.Count == 0) { <p>Chưa tìm thấy khách sạn phù hợp. Thử tên thành phố hoặc khách sạn khác nhé.</p> }
+                else { <div class="hotel-grid">@foreach (var hotel in Model.HotelList) { <article class="hotel-card"><a asp-page="/Products/Index" asp-route-hotel="@hotel.Id"><img src="@hotel.ImageUrl" alt="@hotel.Name"></a><div class="hotel-body"><span class="badge">@hotel.Badge</span><h3 style="font-size:18px;margin:10px 0 4px"><a asp-page="/Products/Index" asp-route-hotel="@hotel.Id">@hotel.Name</a></h3><p class="muted">@hotel.Location</p><div><span class="rating">★ @hotel.Rating</span> <span class="muted">(@hotel.Reviews đánh giá)</span></div><div class="card-actions"><span class="price">@hotel.Price.ToString("N0") ₫</span><a class="primary" asp-page="/Products/Index" asp-route-hotel="@hotel.Id">Xem phòng</a></div></div></article> }</div>}
+            </section>
+        }
+        else
+        {
+            <section class="section"><h2>Điểm đến thịnh hành</h2><p class="muted">Chọn một địa điểm để xem khách sạn phù hợp</p><div class="dest-grid">@foreach (var dest in Model.DestinationList) { <a class="dest" asp-page="/Products/Index" asp-route-destination="@dest.Name"><img src="@dest.Img" alt="@dest.Name"><span>@dest.Name<br><small>@dest.Hotels</small></span></a> }</div></section>
+            <section class="section"><h2>Khách sạn nổi bật</h2><p class="muted">Xem thông tin chi tiết và chọn lịch đặt phòng</p><div class="hotel-grid">@foreach (var hotel in Model.HotelList) { <article class="hotel-card"><a asp-page="/Products/Index" asp-route-hotel="@hotel.Id"><img src="@hotel.ImageUrl" alt="@hotel.Name"></a><div class="hotel-body"><span class="badge">@hotel.Badge</span><h3 style="font-size:18px;margin:10px 0 4px"><a asp-page="/Products/Index" asp-route-hotel="@hotel.Id">@hotel.Name</a></h3><p class="muted">@hotel.Location</p><div><span class="rating">★ @hotel.Rating</span> <span class="muted">(@hotel.Reviews đánh giá)</span></div><div class="card-actions"><span><small class="muted">Giá từ</small><br><span class="price">@hotel.Price.ToString("N0") ₫</span></span><a class="primary" asp-page="/Products/Index" asp-route-hotel="@hotel.Id">Đặt ngay</a></div></div></article> }</div></section>
+        }
+    </main>
+}
+</div>
